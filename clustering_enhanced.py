@@ -170,22 +170,103 @@ print(f"  Shape: {data_scaled.shape}\n")
 
 
 # ============================================================================
-# STEP 9: SET K VALUE
+# STEP 9: ELBOW METHOD (DETERMINE OPTIMAL K)
 # ============================================================================
 print("="*80)
-print("STEP 9: SET K VALUE")
+print("STEP 9: ELBOW METHOD")
+print("="*80)
+
+# Test K dari 2 sampai 10
+K_range = range(2, 11)
+inertias = []
+silhouettes = []
+
+print("Testing different K values...")
+for k in K_range:
+    kmeans_test = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans_test.fit(data_scaled)
+    inertias.append(kmeans_test.inertia_)
+    silhouette = silhouette_score(data_scaled, kmeans_test.labels_)
+    silhouettes.append(silhouette)
+    print(f"  K={k}: Inertia={kmeans_test.inertia_:.2f}, Silhouette={silhouette:.4f}")
+
+# Plot Elbow Method
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+
+# Plot 1: Inertia (Elbow)
+ax1.plot(K_range, inertias, 'bo-', linewidth=2, markersize=8)
+ax1.set_xlabel('Number of Clusters (K)', fontsize=13, fontweight='bold')
+ax1.set_ylabel('Inertia (Within-Cluster Sum of Squares)', fontsize=13, fontweight='bold')
+ax1.set_title('Elbow Method: Inertia vs K', fontsize=15, fontweight='bold', pad=10)
+ax1.grid(True, alpha=0.3, linestyle='--')
+ax1.set_xticks(K_range)
+
+# Tambahkan annotation untuk elbow point
+for i, (k, inertia) in enumerate(zip(K_range, inertias)):
+    ax1.annotate(f'{inertia:.0f}',
+                xy=(k, inertia),
+                xytext=(0, 10),
+                textcoords='offset points',
+                ha='center',
+                fontsize=9)
+
+# Plot 2: Silhouette Score
+ax2.plot(K_range, silhouettes, 'ro-', linewidth=2, markersize=8)
+ax2.set_xlabel('Number of Clusters (K)', fontsize=13, fontweight='bold')
+ax2.set_ylabel('Silhouette Score', fontsize=13, fontweight='bold')
+ax2.set_title('Elbow Method: Silhouette Score vs K', fontsize=15, fontweight='bold', pad=10)
+ax2.grid(True, alpha=0.3, linestyle='--')
+ax2.set_xticks(K_range)
+ax2.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+
+# Tambahkan annotation untuk silhouette scores
+for i, (k, sil) in enumerate(zip(K_range, silhouettes)):
+    ax2.annotate(f'{sil:.3f}',
+                xy=(k, sil),
+                xytext=(0, 10),
+                textcoords='offset points',
+                ha='center',
+                fontsize=9)
+
+# Highlight best silhouette
+best_k_idx = silhouettes.index(max(silhouettes))
+best_k = list(K_range)[best_k_idx]
+ax2.scatter(best_k, silhouettes[best_k_idx],
+           s=300, facecolors='none', edgecolors='green', linewidth=3,
+           label=f'Best K={best_k}', zorder=5)
+ax2.legend(fontsize=11)
+
+plt.suptitle('Elbow Method Analysis: Determining Optimal K',
+             fontsize=16, fontweight='bold')
+plt.tight_layout()
+
+# Simpan di folder results
+import os
+os.makedirs('results', exist_ok=True)
+elbow_filename = 'results/elbow_method.png'
+plt.savefig(elbow_filename, dpi=150, bbox_inches='tight')
+print(f"\n✓ Saved: {elbow_filename}\n")
+plt.close()
+
+
+# ============================================================================
+# STEP 10: SET K VALUE
+# ============================================================================
+print("="*80)
+print("STEP 10: SET K VALUE")
 print("="*80)
 
 K = 5  # ← UBAH NILAI K DI SINI JIKA PERLU!
 
-print(f"✓ K = {K} clusters\n")
+print(f"✓ K = {K} clusters")
+print(f"  Recommended from Elbow Method: K={best_k} (highest Silhouette: {max(silhouettes):.4f})\n")
 
 
 # ============================================================================
-# STEP 10: PERFORM K-MEANS CLUSTERING
+# STEP 11: PERFORM K-MEANS CLUSTERING
 # ============================================================================
 print("="*80)
-print("STEP 10: K-MEANS CLUSTERING")
+print("STEP 11: K-MEANS CLUSTERING")
 print("="*80)
 
 kmeans = KMeans(n_clusters=K, random_state=42, n_init=10)
@@ -197,10 +278,10 @@ print(f"  n_init: 10 (10 different centroid initializations)\n")
 
 
 # ============================================================================
-# STEP 11: EVALUATE CLUSTERING
+# STEP 12: EVALUATE CLUSTERING
 # ============================================================================
 print("="*80)
-print("STEP 11: EVALUATE CLUSTERING")
+print("STEP 12: EVALUATE CLUSTERING")
 print("="*80)
 
 silhouette = silhouette_score(data_scaled, labels)
@@ -218,17 +299,17 @@ print()
 
 
 # ============================================================================
-# STEP 12: PREPARE COLOR PALETTE
+# STEP 13: PREPARE COLOR PALETTE
 # ============================================================================
 colors_palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F']
 colors = colors_palette[:K]
 
 
 # ============================================================================
-# STEP 13: VISUALISASI 1 - PAIRWISE SCATTER PLOT
+# STEP 14: VISUALISASI 1 - PAIRWISE SCATTER PLOT
 # ============================================================================
 print("="*80)
-print("STEP 13: CREATE PAIRWISE SCATTER PLOT")
+print("STEP 14: CREATE PAIRWISE SCATTER PLOT")
 print("="*80)
 
 # Pilih 4 fitur penting untuk visualisasi
@@ -323,18 +404,18 @@ plt.suptitle(f'K-Means Clustering (K={K}): Pairwise Visualization\n'
              fontsize=16, fontweight='bold', y=0.995)
 plt.tight_layout()
 
-# Simpan gambar
-filename1 = f'enhanced_pairwise_k{K}.png'
+# Simpan gambar ke folder results
+filename1 = f'results/pairwise_k{K}.png'
 plt.savefig(filename1, dpi=150, bbox_inches='tight')
 print(f"✓ Saved: {filename1}\n")
 plt.close()
 
 
 # ============================================================================
-# STEP 14: VISUALISASI 2 - INTERACTIVE MAP (FOLIUM)
+# STEP 15: VISUALISASI 2 - INTERACTIVE MAP (FOLIUM)
 # ============================================================================
 print("="*80)
-print("STEP 14: CREATE INTERACTIVE MAP")
+print("STEP 15: CREATE INTERACTIVE MAP")
 print("="*80)
 
 # Tambahkan kolom tambahan ke data original
@@ -468,8 +549,8 @@ m.get_root().html.add_child(folium.Element(legend_html))
 # Tambahkan fullscreen button
 plugins.Fullscreen().add_to(m)
 
-# Simpan map sebagai HTML
-filename2 = f'enhanced_geographic_map_k{K}.html'
+# Simpan map sebagai HTML ke folder results
+filename2 = f'results/geographic_map_k{K}.html'
 m.save(filename2)
 
 print(f"✓ Saved: {filename2}")
@@ -485,10 +566,11 @@ print("="*80)
 print("SUMMARY")
 print("="*80)
 
-print(f"\n✓ Total visualizations created: 2 files")
+print(f"\n✓ Total visualizations created: 3 files")
 print(f"\nFiles:")
-print(f"  1. {filename1} - Pairwise scatter plot (PNG)")
-print(f"  2. {filename2} - Interactive OpenStreetMap (HTML)")
+print(f"  1. {elbow_filename} - Elbow Method analysis (PNG)")
+print(f"  2. {filename1} - Pairwise scatter plot (PNG)")
+print(f"  3. {filename2} - Interactive OpenStreetMap (HTML)")
 
 print(f"\nClustering Results (K={K}):")
 print(f"  Silhouette Score: {silhouette:.4f}")

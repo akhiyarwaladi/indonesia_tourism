@@ -40,9 +40,14 @@ wheels/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Project specific - CSV files
 *.csv
 !tourism_with_id.csv
 !tourism_rating.csv
 !package_tourism.csv
 !user.csv
+
+# Keep results folder but ignore its contents in git
+# (results will be generated when running the script)
+# Uncomment below if you want to exclude results from git:
+# results/
