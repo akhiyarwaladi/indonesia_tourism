@@ -1,78 +1,65 @@
-# Tutorial Clustering - Indonesia Tourism Dataset
+# Indonesia Tourism Clustering Analysis
 
-Repository untuk tutorial mata kuliah Data Mining tentang clustering (K-Means dan Hierarchical Clustering) menggunakan dataset destinasi wisata Indonesia.
+Analisis clustering untuk destinasi wisata Indonesia menggunakan K-Means dengan Exploratory Data Analysis (EDA) lengkap, Elbow Method, dan visualisasi interaktif menggunakan OpenStreetMap.
 
-## 📁 Struktur File
+## 📊 Dataset
 
-```
-indonesia_tourism/
-├── venv/                                    # Virtual environment
-├── clustering_tutorial.py                   # Script utama tutorial (READY TO USE)
-├── clustering_tutorial.ipynb                # Jupyter notebook (optional)
-├── ANALISIS_CLUSTERING.md                   # Analisis lengkap business implications
-├── README.md                                # File ini
-│
-├── tourism_with_id.csv                      # Dataset utama (437 destinasi)
-├── tourism_rating.csv                       # Rating dari user (10,000 ratings)
-├── user.csv                                 # Data user (300 users)
-├── package_tourism.csv                      # Paket wisata (100 packages)
-│
-├── tourism_clustered_results.csv            # Hasil clustering dengan label
-├── clustering_comparison_results.csv        # Tabel perbandingan metode
-│
-└── Output Visualizations:
-    ├── 01_feature_distributions.png         # Distribusi & boxplot fitur
-    ├── 02_correlation_matrix.png            # Heatmap korelasi
-    ├── 03_elbow_method.png                  # Elbow curve
-    ├── 04_silhouette_analysis.png           # Silhouette score
-    ├── 05_kmeans_preprocessing_comparison.png
-    ├── 06_kmeans_different_k.png
-    ├── 07_dendrograms.png                   # 4 dendrogram
-    ├── 08_hierarchical_linkage_methods.png
-    ├── 09_hierarchical_different_k.png
-    ├── 10_kmeans_visualization.png          # PCA K-Means
-    ├── 11_hierarchical_visualization.png    # PCA Hierarchical
-    ├── 12_kmeans_vs_hierarchical.png
-    └── 13_final_comparison.png              # Summary
-```
+**Sumber:** [Kaggle - Indonesia Tourism Destination](https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination)
 
-## 🎯 Tujuan Tutorial
+### Data Files:
+- **tourism_with_id.csv** (437 destinations)
+  - Place_Id, Place_Name, Description, Category, City
+  - Price, Rating, Time_Minutes, Lat, Long
 
-1. **Eksplorasi Data** - Missing values, outliers, data quality
-2. **Integrasi Data** - Menggabungkan multiple CSV files
-3. **Preprocessing** - Handling missing values, outliers, scaling
-4. **Clustering** - K-Means dan Hierarchical dengan berbagai parameter
-5. **Perbandingan** - Dengan/tanpa preprocessing, parameter berbeda
-6. **Business Implications** - Interpretasi hasil untuk keputusan bisnis
+- **tourism_rating.csv** (10,000 user ratings)
+  - User_Id, Place_Id, Place_Ratings
+
+- **user.csv** (300 users)
+  - User_Id, Location, Age
+
+- **package_tourism.csv** (100 tourism packages)
+
+## 🎯 Features
+
+Script ini menggunakan **8 features** untuk clustering:
+
+1. **Price** - Harga tiket masuk (Rp)
+2. **Rating** - Rating official (1-5)
+3. **Time_Minutes** - Lama kunjungan yang disarankan (menit)
+4. **Lat** - Latitude (koordinat geografis)
+5. **Long** - Longitude (koordinat geografis)
+6. **Avg_Rating** - Average user rating dari reviews (2-4)
+7. **Rating_Count** - Jumlah user reviews
+8. **Rating_Std** - Standar deviasi dari user ratings
 
 ## 🚀 Quick Start
 
-### Setup (Local)
+### Setup Environment
 
 ```bash
-# 1. Buat virtual environment
+# 1. Clone repository
+git clone https://github.com/akhiyarwaladi/indonesia_tourism.git
+cd indonesia_tourism
+
+# 2. Create virtual environment
 python3 -m venv venv
 
-# 2. Aktifkan venv
+# 3. Activate virtual environment
 source venv/bin/activate  # Linux/Mac
 # atau
 venv\Scripts\activate  # Windows
 
-# 3. Install dependencies
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# 4. Download dataset (jika belum ada)
-kaggle datasets download aprabowo/indonesia-tourism-destination
-unzip indonesia-tourism-destination.zip
-
-# 5. Run tutorial
-python clustering_tutorial.py
+# 5. Run clustering analysis
+python clustering_enhanced.py
 ```
 
-### Setup (Google Colab)
+### Setup for Google Colab
 
 ```python
-# 1. Upload kaggle.json untuk credentials
+# 1. Upload kaggle.json untuk download dataset
 from google.colab import files
 files.upload()
 
@@ -86,190 +73,243 @@ files.upload()
 !unzip indonesia-tourism-destination.zip
 
 # 4. Install dependencies
-!pip install scikit-learn pandas numpy matplotlib seaborn scipy
+!pip install scikit-learn pandas numpy matplotlib seaborn scipy folium
 
-# 5. Copy & paste seluruh isi clustering_tutorial.py
-# 6. Run!
+# 5. Upload clustering_enhanced.py dan run!
 ```
 
-## 📊 Dataset
-
-**Sumber:** [Kaggle - Indonesia Tourism Destination](https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination)
-
-### Files:
-- **tourism_with_id.csv** (437 rows, 13 columns)
-  - Place_Id, Place_Name, Description, Category, City
-  - Price, Rating, Time_Minutes, Lat, Long, etc.
-
-- **tourism_rating.csv** (10,000 rows)
-  - User_Id, Place_Id, Place_Ratings
-
-- **user.csv** (300 rows)
-  - User_Id, Location, Age
-
-- **package_tourism.csv** (100 rows)
-  - Package details
-
-### Features untuk Clustering:
-- `Price` - Harga tiket masuk
-- `Rating` - Rating tempat wisata (1-5)
-- `Time_Minutes` - Durasi kunjungan rata-rata
-- `Lat`, `Long` - Koordinat geografis
-- `Avg_Rating` - Average rating dari user (aggregated)
-- `Rating_Count` - Jumlah rating yang diterima
-- `Rating_Std` - Standar deviasi rating
-
-## 🔬 Metodologi
-
-### Pipeline:
+## 📁 Project Structure
 
 ```
-1. Load Data
-   ↓
-2. EDA (Missing values, Outliers, Statistics)
-   ↓
-3. Data Integration (Merge tourism + ratings)
-   ↓
-4. Feature Selection (8 numerical features)
-   ↓
-5. Preprocessing
-   ├─ Fill missing values (median)
-   ├─ Outlier capping (IQR method)
-   └─ Feature scaling (StandardScaler)
-   ↓
-6. K-Means Clustering
-   ├─ Elbow method
-   ├─ Silhouette analysis
-   ├─ Test K=2,3,4,5,6
-   └─ With/Without preprocessing
-   ↓
-7. Hierarchical Clustering
-   ├─ Dendrogram (4 linkage methods)
-   ├─ Test linkage: ward, complete, average, single
-   ├─ Test K=2,3,4,5,6
-   └─ With/Without preprocessing
-   ↓
-8. Visualization (PCA 2D)
-   ↓
-9. Evaluation & Comparison
-   ├─ Silhouette Score
-   ├─ Davies-Bouldin Index
-   └─ Calinski-Harabasz Index
-   ↓
-10. Business Interpretation
+indonesia_tourism/
+├── clustering_enhanced.py          # Main script (19 steps)
+├── requirements.txt                # Python dependencies
+├── README.md                       # Documentation
+│
+├── Dataset CSV Files:
+│   ├── tourism_with_id.csv
+│   ├── tourism_rating.csv
+│   ├── user.csv
+│   └── package_tourism.csv
+│
+└── results/                        # Output folder (auto-generated)
+    ├── eda_distributions.png       # Feature distributions (EDA)
+    ├── eda_correlation.png         # Correlation matrix (EDA)
+    ├── eda_outliers.png            # Outlier detection (EDA)
+    ├── elbow_method.png            # Elbow analysis for optimal K
+    ├── pairwise_k5.png             # Pairwise scatter plots
+    └── geographic_map_k5.html      # Interactive OpenStreetMap
 ```
 
-## 📈 Hasil Utama
+## 🔬 Analysis Pipeline (19 Steps)
 
-### K Optimal:
-- **Teknis (Silhouette):** K=2 (Score: 0.2102)
-- **Bisnis (Rekomendasi):** K=3 (Score: 0.2060)
-- **Detail Analysis:** K=4 (Score: 0.1841)
+### **Phase 1: Data Loading & Preparation (Steps 1-3)**
+1. **Load Data** - Load tourism dan ratings CSV
+2. **Aggregate Ratings** - Calculate avg, count, std per destination
+3. **Merge Data** - Combine tourism + ratings data
 
-### Segmentasi K=3:
+### **Phase 2: Exploratory Data Analysis (Steps 4-7)**
+4. **Data Overview** - Dataset info, missing values, descriptive statistics
+5. **Feature Distributions** - Histogram dengan mean/median untuk semua fitur
+6. **Correlation Analysis** - Correlation heatmap untuk identifikasi multicollinearity
+7. **Outlier Detection** - Boxplot dengan IQR method untuk deteksi outliers
 
-#### Cluster 0: "Budget Cultural Heritage" (46.7%)
-- 💰 Harga: ~Rp 6,300
-- ⭐ Rating: 4.43
-- 📍 Yogyakarta dominant
-- 🎯 Target: Budget travelers, students
+**Key Findings:**
+- Time_Minutes: 53.1% missing values
+- Price & Time_Minutes: Korelasi positif (0.46)
+- Price memiliki outliers ekstrem (max: Rp 900,000)
 
-#### Cluster 1: "Mid-Range City Tourism" (35.0%)
-- 💰 Harga: ~Rp 5,900
-- ⭐ Rating: 4.47 (TERTINGGI)
-- 📍 Bandung/Jakarta
-- 🎯 Target: General tourists
+### **Phase 3: Preprocessing (Steps 8-12)**
+8. **Select Features** - Pilih 8 numerical features
+9. **Handle Missing Values** - Impute Time_Minutes dengan category-based median + jitter
+10. **Outlier Capping** - IQR method untuk cap outliers
+11. **Save Original Data** - Simpan untuk visualisasi
+12. **Feature Scaling** - StandardScaler (mean=0, std=1)
 
-#### Cluster 2: "Premium Theme Parks" (18.3%)
-- 💰 Harga: ~Rp 107,000 (15-20x lebih mahal!)
-- ⭐ Rating: 4.42
-- ⏱️ Durasi: 133 menit (longest)
-- 🎯 Target: Families, premium segment
+### **Phase 4: Clustering (Steps 13-16)**
+13. **Elbow Method** - Test K=2 sampai 10, plot Inertia & Silhouette
+14. **Set K Value** - K=5 (dapat diubah di line 438)
+15. **K-Means Clustering** - Fit model dengan K clusters
+16. **Evaluate** - Silhouette Score & cluster distribution
 
-### Impact of Preprocessing:
+**Hasil Elbow Method:**
+- Best K berdasarkan Silhouette: K=2 (0.1855)
+- K=5 dipilih untuk balance antara simplicity & insight
 
-| Metric | With Preprocessing | Without Preprocessing |
-|--------|-------------------|----------------------|
-| Silhouette Score | 0.2102 | 0.8919 ⚠️ |
-| Davies-Bouldin | 1.8295 | 0.4951 |
-| Calinski-Harabasz | 118.20 | 653.97 |
+### **Phase 5: Visualization (Steps 17-19)**
+17. **Prepare Colors** - Color palette untuk consistency
+18. **Pairwise Scatter** - 6 kombinasi dari 4 fitur penting dengan confidence ellipses
+19. **Interactive Map** - OpenStreetMap dengan Folium, 437 markers dengan popup info
 
-**⚠️ Catatan:** Tanpa preprocessing memberikan score "bagus" tapi **misleading** karena didominasi outliers!
+## 📈 Output Visualizations
 
-### Comparison: K-Means vs Hierarchical
+### 1. EDA Outputs (3 files)
 
-| Method | Silhouette | Davies-Bouldin | Calinski-Harabasz |
-|--------|-----------|----------------|-------------------|
-| K-Means (preprocessed) | **0.2102** | 1.8295 | **118.20** |
-| Hierarchical ward (preprocessed) | 0.1607 | 2.0974 | 85.04 |
-| Hierarchical average | **0.2785** | **1.0667** | 4.92 |
-| Hierarchical single | 0.2474 | 0.6044 | 2.54 |
+#### `eda_distributions.png`
+- Histogram untuk 8 features
+- Mean dan median lines
+- Identify skewness dan data distribution
 
-**Best:** K-Means dengan preprocessing untuk balanced performance
+#### `eda_correlation.png`
+- Heatmap correlation matrix 8x8
+- Values displayed (-1 to 1)
+- Identify feature relationships
 
-## 💡 Business Implications
+#### `eda_outliers.png`
+- Boxplots untuk semua features
+- IQR outlier detection
+- Outlier count per feature
 
-### Actionable Strategies:
+### 2. Clustering Outputs (3 files)
 
-**Untuk Cluster 0 (Budget):**
-- Promosi via social media edu-content
-- Group discount & student discount
-- Package: "Yogya Heritage Tour"
+#### `elbow_method.png`
+- Plot 1: Inertia vs K (elbow curve)
+- Plot 2: Silhouette Score vs K
+- Best K highlighted dengan green circle
+- Range K=2 to 10
 
-**Untuk Cluster 1 (Mid-Range):**
-- Instagram marketing, influencer
-- Photo contest, Instagram-able spots
-- Weekend special offers
+#### `pairwise_k5.png`
+- 6 scatter plots (2x3 grid)
+- Kombinasi: Price, Rating, Time_Minutes, User_Rating
+- Confidence ellipses (1σ dan 2σ)
+- Cluster centers marked dengan X
+- Silhouette score di setiap subplot
 
-**Untuk Cluster 2 (Premium):**
-- Family packages & corporate B2B
-- Annual membership program
-- TV advertising
+#### `geographic_map_k5.html` ⭐
+- **Interactive map** Indonesia dengan OpenStreetMap
+- 437 CircleMarkers berwarna sesuai cluster
+- Click marker untuk detail: Price, Rating, Time, Category, City
+- Cluster centers marked dengan star (⭐)
+- Legend dengan cluster distribution
+- Zoom & pan untuk eksplorasi
+- Fullscreen mode available
 
-### Mixed Package Tours:
-- **Budget Explorer:** Rp 50,000 (2 dari C0 + 1 dari C1)
-- **Complete Experience:** Rp 150,000 (1 dari tiap cluster)
-- **Premium All-In:** Rp 500,000+ (focus C2 + extras)
+## 🎨 Visualization Features
 
-📖 **Lihat `ANALISIS_CLUSTERING.md` untuk detail lengkap!**
+### Pairwise Scatter Plot:
+- ✅ Confidence ellipses (1σ dan 2σ) untuk cluster spread
+- ✅ Cluster centers (X mark hitam + warna)
+- ✅ White edges untuk clarity
+- ✅ Silhouette score box di setiap plot
+- ✅ 6 combinations dari 4 features penting
 
-## 🎓 Materi Pembelajaran
+### Interactive Map:
+- ✅ Real OpenStreetMap Indonesia
+- ✅ Color-coded markers per cluster
+- ✅ Popup HTML dengan 7 informasi
+- ✅ Tooltip on hover
+- ✅ Cluster centers dengan star icon
+- ✅ Legend floating (kanan bawah)
+- ✅ Zoom controls & scale
+- ✅ Fullscreen button
 
-### Konsep yang Dicakup:
+## 📊 Clustering Results (K=5)
+
+### Cluster Distribution:
+- **Cluster 0:** 62 destinations (14.2%)
+- **Cluster 1:** 92 destinations (21.1%)
+- **Cluster 2:** 113 destinations (25.9%) ← Largest
+- **Cluster 3:** 58 destinations (13.3%)
+- **Cluster 4:** 112 destinations (25.6%)
+
+### Performance Metrics:
+- **Silhouette Score:** 0.1469
+- **Range:** -1 (worst) to 1 (best)
+- **Interpretation:** Moderate cluster separation
+
+### Recommended K:
+- Dari Elbow Method: **K=2** (Silhouette: 0.1855)
+- Current setting: **K=5** (balance insight vs simplicity)
+- Dapat diubah di `line 438` script
+
+## 🔧 Customization
+
+### Mengubah Nilai K:
+
+Edit file `clustering_enhanced.py` di **line 438**:
+
+```python
+K = 5  # ← UBAH NILAI INI! (2-10 recommended)
+```
+
+Lalu jalankan ulang:
+```bash
+python clustering_enhanced.py
+```
+
+Output akan generate dengan K baru:
+- `results/elbow_method.png` (sama, untuk reference)
+- `results/pairwise_k{K}.png`
+- `results/geographic_map_k{K}.html`
+
+### Mengubah Features:
+
+Edit **line 88** untuk memilih features berbeda:
+
+```python
+features = ['Price', 'Rating', 'Time_Minutes', 'Lat', 'Long',
+            'Avg_Rating', 'Rating_Count', 'Rating_Std']
+```
+
+## 💡 Key Insights
+
+### 1. Missing Values
+- **Time_Minutes:** 53.1% missing
+- **Solution:** Category-based median imputation + small jitter
+- Lebih realistis dibanding global median
+
+### 2. Outliers
+- **Price:** 40 values capped (max Rp 900,000 → premium theme parks)
+- **Time_Minutes:** 27 values capped
+- **Method:** IQR (Q1 - 1.5×IQR, Q3 + 1.5×IQR)
+
+### 3. Feature Correlation
+- **Price ↔ Time_Minutes:** 0.46 (positive correlation)
+- Destinasi mahal cenderung butuh waktu lebih lama
+- **Rating ↔ Other features:** Korelasi lemah (rating relatif uniform)
+
+### 4. Geographic Distribution
+- Clusters menunjukkan pola geografis
+- Jakarta, Bandung, Yogyakarta dominant
+- Interactive map memudahkan analisis spasial
+
+## 🎓 Learning Objectives
+
+Script ini mencakup konsep:
 
 1. **Data Preprocessing**
-   - Missing value imputation
-   - Outlier detection & treatment (IQR)
+   - Missing value imputation (category-based)
+   - Outlier detection & capping (IQR)
    - Feature scaling (StandardScaler)
-   - Why preprocessing matters!
+   - Why preprocessing is critical!
 
-2. **Clustering Algorithms**
-   - K-Means (partitional clustering)
-   - Hierarchical Clustering (agglomerative)
-   - Linkage methods: ward, complete, average, single
-   - Dendrogram interpretation
+2. **Exploratory Data Analysis**
+   - Distribution analysis
+   - Correlation analysis
+   - Outlier detection
+   - Visual insights before modeling
 
-3. **Optimal K Selection**
-   - Elbow Method
-   - Silhouette Analysis
-   - Trade-off: simplicity vs insight
-
-4. **Evaluation Metrics**
-   - Silhouette Score (higher better, range -1 to 1)
-   - Davies-Bouldin Index (lower better)
-   - Calinski-Harabasz Index (higher better)
-
-5. **Visualization**
-   - PCA for dimensionality reduction
-   - 2D scatter plots
-   - Dendrogram
-
-6. **Business Translation**
+3. **Clustering**
+   - K-Means algorithm
+   - Optimal K selection (Elbow Method)
+   - Silhouette Score evaluation
    - Cluster interpretation
-   - Target market identification
-   - Actionable marketing strategies
 
-## 🔧 Dependencies
+4. **Visualization**
+   - Static plots (matplotlib/seaborn)
+   - Interactive maps (Folium)
+   - Confidence ellipses
+   - Multi-plot layouts
+
+5. **Code Quality**
+   - 19 clear steps (no functions)
+   - Extensive comments
+   - Easy to understand for students
+   - Ready for Google Colab
+
+## 📦 Dependencies
+
+Lihat `requirements.txt`:
 
 ```
 pandas
@@ -278,89 +318,96 @@ scikit-learn
 matplotlib
 seaborn
 scipy
-kaggle (for dataset download)
+folium
 ```
 
-Install via: `pip install -r requirements.txt`
+Install semua:
+```bash
+pip install -r requirements.txt
+```
 
-## 📝 Output Files
+## ⚙️ Technical Details
 
-### Visualizations (13 PNG files):
-Semua visualisasi otomatis ter-generate dengan resolusi tinggi (100 DPI), siap untuk presentasi.
+### Preprocessing Pipeline:
+1. Category-based median imputation untuk Time_Minutes
+2. Small jitter (σ=3) untuk menghindari overlap
+3. IQR outlier capping untuk semua features
+4. StandardScaler untuk normalisasi
 
-### Data Files (2 CSV files):
-- `tourism_clustered_results.csv` - Original data + cluster labels
-- `clustering_comparison_results.csv` - Metrics comparison table
+### K-Means Parameters:
+- `n_clusters`: 5 (default, can be changed)
+- `random_state`: 42 (reproducibility)
+- `n_init`: 10 (10 different centroid initializations)
+- `algorithm`: 'lloyd' (default)
 
-## ⚠️ Important Notes
+### Elbow Method:
+- Test range: K=2 to 10
+- Metrics: Inertia & Silhouette Score
+- Auto-highlight best K
 
-1. **Preprocessing is Critical!**
-   - Tanpa preprocessing: hasil misleading (outlier dominant)
-   - Dengan preprocessing: hasil interpretable & actionable
+## 🎯 Use Cases
 
-2. **K Selection:**
-   - K=2: Terlalu sederhana
-   - K=3: Sweet spot (REKOMENDASI)
-   - K>5: Over-segmentation
+### For Students:
+- Learn clustering step-by-step
+- Understand preprocessing importance
+- Practice data visualization
+- Business interpretation skills
 
-3. **Algorithm Choice:**
-   - K-Means: Cepat, untuk dataset besar
-   - Hierarchical: Lebih fleksibel, tapi lambat
+### For Instructors:
+- Ready-to-use tutorial material
+- Clear step-by-step execution
+- Discussion-friendly results
+- Assignment-ready
 
-4. **Business Context Matters:**
-   - Jangan hanya lihat metrics
-   - Interpretasi cluster dalam konteks bisnis
-   - Actionable > Perfect score
+### For Data Analysts:
+- Template for clustering analysis
+- EDA best practices
+- Interactive visualization
+- Business insights
 
-## 🎯 Pertanyaan Diskusi
+## 📝 Notes
 
-1. Mengapa K=2 punya Silhouette Score tertinggi tapi kita rekomendasikan K=3?
-2. Apa dampak tidak melakukan preprocessing terhadap hasil clustering?
-3. Kapan sebaiknya menggunakan K-Means vs Hierarchical Clustering?
-4. Bagaimana cara menjelaskan hasil clustering ke non-technical stakeholder?
-5. Jika Anda CEO travel agency, strategi marketing apa yang Anda design berdasarkan clustering ini?
+1. **Script tanpa function** - Semua code sequential, mudah dipahami mahasiswa
+2. **19 steps yang jelas** - Setiap step ter-dokumentasi dengan baik
+3. **Output ke folder results/** - Organized & clean
+4. **Interactive map** - Better insight daripada static plot
+5. **K dapat diubah** - Experiment dengan different K values
+6. **EDA comprehensive** - Understand data before modeling
+
+## 🚨 Common Issues
+
+### Issue: Folium import error
+```bash
+pip install folium
+```
+
+### Issue: Results folder not created
+Script akan auto-create folder `results/` jika belum ada.
+
+### Issue: Memory error dengan K besar
+Reduce K atau subsample data untuk testing.
+
+### Issue: Map tidak load di browser
+Pastikan file HTML dibuka dari local file system, bukan dari network drive.
 
 ## 📚 References
 
 - Dataset: [Kaggle - Indonesia Tourism Destination](https://www.kaggle.com/datasets/aprabowo/indonesia-tourism-destination)
-- Scikit-learn Clustering: https://scikit-learn.org/stable/modules/clustering.html
-- Silhouette Analysis: https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+- Scikit-learn: https://scikit-learn.org/stable/modules/clustering.html
+- Folium Maps: https://python-visualization.github.io/folium/
 
-## 👨‍🏫 Untuk Dosen/Instruktur
+## 👨‍💻 Author
 
-### Skenario Pengajaran:
+Created for Data Mining course tutorial - September 2025
 
-**Session 1 (90 menit):**
-- Teori: Clustering basics, K-Means, Hierarchical
-- Demo: Run `clustering_tutorial.py` section by section
-- Diskusi: Interpretasi output & visualisasi
+Repository: https://github.com/akhiyarwaladi/indonesia_tourism
 
-**Session 2 (90 menit):**
-- Hands-on: Mahasiswa run sendiri di Google Colab
-- Exercise: Ubah parameter (K, linkage method)
-- Group work: Business interpretation & presentation
+## 📄 License
 
-**Assignment:**
-- Analyze cluster characteristics
-- Propose marketing strategy per cluster
-- Compare different K values
-- Report hasil dengan visualisasi
-
-### Grading Rubric:
-- Technical execution (40%): Preprocessing, clustering, metrics
-- Analysis (30%): Interpretasi cluster, optimal K selection
-- Business translation (20%): Actionable strategies
-- Presentation (10%): Clarity, visualizations
-
-## 📞 Support
-
-Untuk pertanyaan atau issues:
-1. Baca `ANALISIS_CLUSTERING.md` untuk detail lengkap
-2. Check code comments di `clustering_tutorial.py`
-3. Review visualizations untuk insights
+Dataset from Kaggle (CC0: Public Domain)
 
 ---
 
 **Happy Clustering! 🎉**
 
-Dibuat untuk tutorial Data Mining - September 2025# indonesia_tourism
+*Explore Indonesia tourism destinations through data science!*
